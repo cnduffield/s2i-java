@@ -2,7 +2,7 @@
    "kind": "ImageStream",
    "apiVersion": "image.openshift.io/v1",
    "metadata": {
-      "name": "s2i-java-gradle-v1"
+      "name": "s2i-java-gradle-v1",
       "namespace": "openshift"
    },
    "spec": {
