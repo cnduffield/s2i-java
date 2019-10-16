@@ -42,8 +42,10 @@ LABEL io.k8s.description="Platform for building Java (fatjar) applications with 
 # COPY Additional files,configurations that we want to ship by default, like a default setting.xml
 COPY ./contrib/settings.xml $HOME/.m2/
 
-LABEL io.openshift.s2i.scripts-ur=https://github.com/cnduffield/s2i-java/tree/master/sti/bin
+#LABEL io.openshift.s2i.scripts-ur=https://github.com/cnduffield/s2i-java/tree/master/sti/bin
 #COPY ./sti/bin/ /usr/local/sti
+LABEL io.openshift.s2i.scripts-url=image:///usr/local/sti
+COPY ./sti/bin/ /usr/local/sti
 
 RUN chown -R 1001:1001 /opt/openshift
 
