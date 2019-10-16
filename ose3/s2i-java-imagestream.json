@@ -18,7 +18,7 @@
             },
             "from": {
                "kind": "DockerImage",
-               "name": "docker.io/jorgemoralespou/s2i-java:latest"
+               "name": "docker.io/cnduffield/s2i-gradle:latest"
             }
          }
       ]
