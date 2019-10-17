@@ -1,0 +1,235 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "gradle-s2i",
+        "creationTimestamp": null,
+        "annotations": {
+            "description": "This is an example of a static web application on OpenShift",
+            "tags": "instant-app,httpd"
+        }
+    },
+    "labels": {
+        "template": "httpd-s2i"
+    },
+    "objects": [
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "annotations": {
+                    "description": "The web server's http port."
+                },
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}",
+                "creationTimestamp": null
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "port": 8080,
+                        "targetPort": 8080
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "id": "${APPLICATION_NAME}-http-route",
+            "metadata": {
+                "annotations": {
+                    "description": "Route for application's http service."
+                },
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}-http-route"
+            },
+            "spec": {
+                "host": "${APPLICATION_HOSTNAME}-<YOUR PROJECT NAME>.apps.<YOUR DOMAIN>",
+                "to": {
+                    "name": "${APPLICATION_NAME}",
+                    "kind": "Service"
+                }
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "httpd",
+                "creationTimestamp": null
+            },
+            "spec": {
+                "dockerImageRepository": "docker.io/cnduffield/s2i-gradle"
+            },
+            "status": {
+                "dockerImageRepository": ""
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "creationTimestamp": null,
+                "name": "${APPLICATION_NAME}"
+            },
+            "spec": {
+                "triggers": [
+                    {
+                        "github": {
+                            "secret": "${GITHUB_TRIGGER_SECRET}"
+                        },
+                        "type": "github"
+                    },
+                    {
+                        "generic": {
+                            "secret": "${GENERIC_TRIGGER_SECRET}"
+                        },
+                        "type": "generic"
+                    },
+                    {
+                        "imageChange": {},
+                        "type": "imageChange"
+                    }
+                ],
+                "source": {
+                    "git": {
+                        "ref": "${GIT_REF}",
+                        "uri": "${GIT_URI}"
+                    },
+                    "type": "Git"
+                },
+                "strategy": {
+                    "type": "Source",
+                    "sourceStrategy": {
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "httpd-s2i:2.4",
+                            "namespace": "<YOUR NAMESPACE>"
+                        }
+                    }
+                },
+               "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}:latest"
+                    }
+                },
+                "env": []
+             }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}",
+                "creationTimestamp": null
+            },
+            "spec": {
+                "replicas": 1,
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                },
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "${APPLICATION_NAME}"
+                            ],
+                            "from": {
+                                "kind": "ImageStream",
+                                "name": "${APPLICATION_NAME}"
+                            }
+                        }
+                    }
+                ],
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "application": "${APPLICATION_NAME}",
+                            "deploymentConfig": "${APPLICATION_NAME}"
+                        },
+                        "name": "${APPLICATION_NAME}"
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "env": [],
+                                "image": "${APPLICATION_NAME}",
+                                "imagePullPolicy": "Always",
+                                "name": "${APPLICATION_NAME}",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ],
+    "parameters": [
+        {
+            "name": "APPLICATION_NAME",
+            "description": "Application NAME"
+        },
+        {
+            "name": "GIT_URI",
+            "description": "GIT URI"
+        },
+        {
+            "name": "GIT_REF",
+            "description": "Git branch"
+        },
+        {
+            "name": "GIT_CONTEXT_DIR",
+            "description": "Path within Git project to build; empty for root project directory."
+        },
+        {
+            "name": "GITHUB_TRIGGER_SECRET",
+            "description": "Github trigger secret",
+            "generate": "expression",
+            "from": "[a-zA-Z0-9]{8}"
+        },
+        {
+            "name": "GENERIC_TRIGGER_SECRET",
+            "description": "Generic build trigger secret",
+            "generate": "expression",
+            "from": "[a-zA-Z0-9]{8}"
+        },
+        {
+            "name": "APPLICATION_HOSTNAME",
+            "description": "Application hostname"
+        }
+    ]
+}
