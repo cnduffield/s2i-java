@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ImageStream
+metadata:
+  name: gradle-s2i
+  annotations:
+    openshift.io/display-name: gradle-s2i
+spec:
+  tags:
+  - name: "v1"
+    annotations:
+      openshift.io/display-name: "CND S2i Gradle v1"
+      description: Build Gradle
+      iconClass: icon-apache
+      tags: builder,httpd
+      supports: httpd,httpd:2.4
+      version: "1"
+    from:
+      kind: DockerImage
+      name: docker.io/${Docker Hub user name}/httpd-s2i:2.4
+  - name: "latest"
+status:
+  dockerImageRepository: docker.io/cnduffield/s2i-gradle
+  tags:
+  - tag: "2.4"
+    items:
+    - dockerImageReference: docker.io/cnduffield/s2i-gradle:latest
