@@ -7,7 +7,7 @@
       "namespace": "openshift"
    },
    "spec": {
-    "dockerImageRepository": "docker.io/cnduffield/s2i-gradle",
+"dockerImageRepository": "docker.io/cnduffield/s2i-gradle",
       "tags": [
          {
             "name": "latest",
@@ -18,8 +18,7 @@
                "supports": "java:8,maven:3,gradle:2.6",
                "sampleRepo": "https://github.com/cnduffield/gradlespring.git",
                "version": "latest"
-            },
-           
+            }
          }
       ]
    }
