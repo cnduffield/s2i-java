@@ -16,7 +16,7 @@ spec:
       version: "1"
     from:
       kind: DockerImage
-      name: docker.io/${Docker Hub user name}/httpd-s2i:2.4
+      name: docker.io/cnduffield/s2i-gradle
   - name: "latest"
 status:
   dockerImageRepository: docker.io/cnduffield/s2i-gradle
